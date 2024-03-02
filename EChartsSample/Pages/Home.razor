@@ -1,0 +1,43 @@
+﻿@page "/"
+@using System.Runtime.InteropServices.JavaScript
+@inject IJSRuntime JSRuntime
+
+<h3>Hello ECharts!</h3>
+<div @ref="chartDiv" id="chartDiv" style="width: 600px; height: 400px;"></div>
+
+@code {
+    private ElementReference chartDiv;
+    private IJSObjectReference? _jsECharts;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JSRuntime.InvokeAsync<IJSObjectReference>("import", "./echarts/echarts.js");
+
+
+            var options = new
+            {
+                animationDuration = 0,
+                tooltip = new { },
+                xAxis = new
+                {
+                    data = new string[] { "shirt", "cardigan", "chiffon", "pants", "heels", "socks" }
+                },
+                yAxis = new { },
+                series = new[]
+                {
+                    new
+                    {
+                        name = "sales",
+                        type = "line",
+                        data = new int[] { 5, 20, 36, 10, 10, 20 }
+                    }
+                }
+            };
+
+            _jsECharts = await JSRuntime.InvokeAsync<IJSObjectReference>("echarts.init", chartDiv);
+            await _jsECharts.InvokeVoidAsync("setOption", options);
+        }
+    }
+}
